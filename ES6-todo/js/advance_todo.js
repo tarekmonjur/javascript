@@ -17,27 +17,7 @@ function Author()
 {
     Common.call(this);
     this.authors = [];
-    let formData = [];
     console.log('author instance...');
-
-    // Setter and Getter
-    Object.defineProperty(this, 'formData', {
-        get : function () {
-            let objData = {};
-            formData.forEach(function(value, key){
-                let name = value.value;
-                objData[value.name] = name.charAt(0).toUpperCase() + name.slice(1);
-            });
-            return objData;
-        },
-        set : function (value) {
-            if(typeof value !== undefined && value.length > 0){
-                formData = value;
-            }else {
-                throw new Error('Empty array set!');
-            }
-        }
-    })
 }
 
 Author.prototype = Object.create(Common.prototype);
@@ -48,9 +28,9 @@ Author.prototype.getAuthors = function fn1(){
     return authors2.reverse();
 };
 
-Author.prototype.addAuthor = function fn2(){
+Author.prototype.addAuthor = function fn2(formData){
     let authorData;
-    authorData = this.formData;
+    authorData = this.convertJson(formData);
     this.authors.push({
         'name' : authorData.author_name,
         'age' : authorData.author_age,
@@ -141,14 +121,12 @@ Book.prototype.renderBook = function renderView(){
 
 
 const book = new Book();
-console.log(book);
 
 $(document).on('submit', '#author_add_form', function(e){
     e.preventDefault();
     var formData = $(this).serializeArray();
     $(this)[0].reset();
-    book.formData = formData;
-    book.addAuthor();
+    book.addAuthor(formData);
     $("#addAuthorModal").modal('hide');
 });
 
