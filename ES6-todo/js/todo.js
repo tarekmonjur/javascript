@@ -5,7 +5,13 @@ class Todo{
         console.log('start todo...');
     }
 
-
+    set bookId(value){
+        let id = parseInt(value);
+        if(isNaN(id) || id < 0){
+            throw new Error('Book Id not valid.');
+        }
+        this.bookKey = value;
+    }
 
     gets(){
         return this.books;
@@ -29,7 +35,7 @@ class Todo{
     renderView(){
         var html = "";
         this.gets().forEach(function(value, key){
-            html += "<tr><td>`${value.book_name}`</td>"+
+            html += `<tr><td>${value.book_name}</td>`+
                 "<td>"+  value.author_name + "</td>"+
                 "<td>"+  value.publish_year + "</td>"+
                 "<td>"+  value.description + "</td>"+
@@ -54,7 +60,7 @@ class Todo{
     }
 
     update(formData){
-        let book = this.convertJson(formData);
+        let book = this.convertArrayToJson(formData);
         this.books[this.bookKey] = book;
         console.log(this.bookKey);
         this.renderView();
@@ -65,6 +71,8 @@ class Todo{
         this.renderView();
     }
 }
+
+
 
 const book = new Todo();
 
@@ -81,7 +89,7 @@ $(document).on('click', '.edit', function(){
    $(".action_btn").attr('id', 'update');
    $(".action_btn").html('Update Book To List');
    $(".form_title").html('Update Book To List');
-   book.bookKey = dataKey;
+   book.bookId = -1;
    book.edit();
 });
 
