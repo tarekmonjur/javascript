@@ -1,145 +1,202 @@
-function Common()
-{
-    console.log('common instance...');
+class Common{
+    constructor()
+    {
+        this.formData;
+    }
+
+    set inputData(value)
+    {
+        if(typeof value !== undefined && value.length > 0){
+            this.formData = value;
+        }else {
+            throw new Error('Empty array set!');
+        }
+    }
+
+    get inputData()
+    {
+        return this.convertJson(this.formData);
+    }
+
+    convertJson(data)
+    {
+        let objData = {};
+        data.forEach(function(value, key){
+            objData[value.name] = value.value;
+        });
+        return objData;
+    }
+
 }
 
-Common.prototype.convertJson = function convertArrayToJson(data){
-    let objData = {};
-    data.forEach(function(value, key){
-        objData[value.name] = value.value;
-    });
-    return objData;
-};
 
 
+class Author extends Common{
+    constructor()
+    {
+        super();
+        this.authorKey;
+        this.authors = [];
+        this.renderAuthor();
+    }
 
-function Author()
-{
-    Common.call(this);
-    this.authors = [];
-    console.log('author instance...');
+    set authorId(value)
+    {
+        let id = parseInt(value);
+        if(isNaN(id) || id < 0){
+            throw new Error('Book Id not valid.');
+        }
+        this.authorKey = value;
+    }
+
+    get authorId()
+    {
+        if(isNaN(this.authorKey) || this.authorKey < 0){
+            return 0;
+        }
+        return this.authorKey;
+    }
+
+    getAuthors()
+    {
+        let authors2 = this.authors.slice();
+        return authors2.reverse();
+    }
+
+    renderAuthor(id=0)
+    {
+        var html = "<select class='form-control' name='author_id'>";
+        this.getAuthors().forEach((obj, key) => {
+            html += `<option value="${obj.id}" ${(obj.id === id)?'selected':''}>${obj.name}</option>`;
+        });
+        html += "</select>";
+        document.getElementById('authors').innerHTML = html;
+    }
+
+    addAuthor()
+    {
+        let authorData;
+        authorData = this.inputData;
+        this.authorId = this.authorId + 1;
+        this.authors.push({
+            'id' : this.authorId,
+            'name' : authorData.author_name,
+            'age' : authorData.author_age,
+            'address' : authorData.author_address,
+        });
+        this.renderAuthor();
+    }
 }
 
-Author.prototype = Object.create(Common.prototype);
-Author.prototype.constructor = Author;
 
-Author.prototype.getAuthors = function fn1(){
-    let authors2 = this.authors.slice();
-    return authors2.reverse();
-};
+class Book extends Author{
+    constructor()
+    {
+        super();
+        this.bookKey;
+        this.books = [];
+    }
 
-Author.prototype.addAuthor = function fn2(formData){
-    let authorData;
-    authorData = this.convertJson(formData);
-    this.authors.push({
-        'name' : authorData.author_name,
-        'age' : authorData.author_age,
-        'address' : authorData.author_address,
-    });
-    book.renderAuthor();
-};
+    set bookId(value)
+    {
+        let id = parseInt(value);
+        if(isNaN(id) || id < 0){
+            throw new Error('Book Id not valid.');
+        }
+        this.bookKey = value;
+    }
 
-Author.prototype.renderAuthor = function fun3(){
-    var html = "<select class='form-control' name='author_id'>";
-    this.getAuthors().forEach((obj, key) => {
-        html += "<option value='"+key+"'>"+obj.name+"</option>";
-    });
-    html += "</select>";
-    document.getElementById('authors').innerHTML = html;
-};
+    get bookId()
+    {
+        return this.bookKey;
+    }
 
+    getBooks()
+    {
+        return this.books;
+    }
 
-
-function Book()
-{
-    Author.call(this);
-    this.books = [];
-    this.bookKey;
-    console.log('book instance...');
-    this.renderAuthor();
-}
-
-Book.prototype = Object.create(Author.prototype);
-Book.prototype.constructor = Book;
-
-Book.prototype.getBooks = function get(){
-    return this.books;
-};
-
-Book.prototype.addBook = function add(formData){
-    let bookData = {};
-    bookData = this.convertJson(formData);
-
-    this.books.splice(0,0,{
-        'name' : bookData.book_name,
-        'author' : this.authors.find((obj, key) => { return key == bookData.author_id}),
-        'year' : bookData.publish_year,
-        'description' : bookData.description,
-    });
-    this.renderBook();
-};
-
-Book.prototype.editBook = function edit(){
-    let book = this.books.find((obj, key) => { return key == this.bookKey});
-    document.getElementById('book_name').value = book.name;
-    // document.getElementById('author_name').value = book.author;
-    document.getElementById('publish_year').value = book.year;
-    document.getElementById('description').value = book.description;
-};
-
-Book.prototype.updateBook  = function update(formData){
-    bookData = this.convertJson(formData);
-    let book = {
-        'name' : bookData.book_name,
-        'author' : this.authors.find((obj, key) => { return key == bookData.author_id}),
-        'year' : bookData.publish_year,
-        'description' : bookData.description,
+    addBook()
+    {
+        let bookData = this.inputData;
+        this.books.splice(0,0,{
+            'name' : bookData.book_name,
+            'author' : this.authors.find((obj, key) => { return obj.id == bookData.author_id}),
+            'year' : bookData.publish_year,
+            'description' : bookData.description,
+        });
+        this.renderBook();
     };
-    this.books[this.bookKey] = book;
-    this.renderBook();
-};
 
-Book.prototype.deleteBook = function deleteBook(key){
-    this.books.pop(key);
-    this.renderBook();
-};
+    editBook()
+    {
+        let book = this.books.find((obj, key) => { return key == this.bookId});
+        this.renderAuthor(book.author.id);
+        document.getElementById('book_name').value = book.name;
+        document.getElementById('publish_year').value = book.year;
+        document.getElementById('description').value = book.description;
+    }
 
-Book.prototype.renderBook = function renderView(){
-    var html = "";
-    this.getBooks().forEach(function(value, key){
-        html += "<tr><td>"+  value.name + "</td>"+
-            "<td>"+  value.author.name + "</td>"+
-            "<td>"+  value.year + "</td>"+
-            "<td>"+  value.description + "</td>"+
-            "<td> <a class='edit' href='javascript:void(0)' data='"+ key +"'>Edit</a> | <a class='delete' href='javascript:void(0)' data='"+ key +"'>Delete</a></td>" +
-            "</tr>";
-    });
-    $("#books").html(html);
-};
+    updateBook()
+    {
+        let bookData = this.inputData;
+        let book = {
+            'name' : bookData.book_name,
+            'author' : this.authors.find((obj, key) => { return obj.id == bookData.author_id}),
+            'year' : bookData.publish_year,
+            'description' : bookData.description,
+        };
+        this.books[this.bookKey] = book;
+        this.renderBook();
+    }
 
+    deleteBook()
+    {
+        this.books.pop(this.bookId);
+        this.renderBook();
+    };
+
+    renderBook()
+    {
+        var html = "";
+        this.getBooks().forEach(function(value, key){
+            html += "<tr><td>"+  value.name + "</td>"+
+                "<td>"+  value.author.name + "</td>"+
+                "<td>"+  value.year + "</td>"+
+                "<td>"+  value.description + "</td>"+
+                "<td> <a class='edit' href='javascript:void(0)' data='"+ key +"'>Edit</a> | <a class='delete' href='javascript:void(0)' data='"+ key +"'>Delete</a></td>" +
+                "</tr>";
+        });
+        $("#books").html(html);
+    }
+}
 
 
 
 const book = new Book();
+console.log(book);
 
 $(document).on('submit', '#author_add_form', function(e){
     e.preventDefault();
     var formData = $(this).serializeArray();
     $(this)[0].reset();
-    book.addAuthor(formData);
+    book.inputData = formData;
+    book.addAuthor();
     $("#addAuthorModal").modal('hide');
 });
 
 $(document).on('click', '#add_book', function(e){
     e.preventDefault();
     let formData = $("#book_form").serializeArray();
-    book.addBook(formData);
+    book.inputData = formData;
+    book.addBook();
     $("#book_form")[0].reset();
 });
 
 $(document).on('click', '.delete', function(){
     let dataKey = $(this).attr('data');
-    book.deleteBook(dataKey);
+    book.bookId = dataKey;
+    book.deleteBook();
 });
 
 $(document).on('click', '.edit', function(){
@@ -153,12 +210,12 @@ $(document).on('click', '.edit', function(){
 
 $(document).on('click', '#update', function(e){
     e.preventDefault();
-    let formData = $("#formData").serializeArray();
-    book.updateBook(formData);
+    let formData = $("#book_form").serializeArray();
+    console.log(formData);
+    book.inputData = formData;
+    book.updateBook();
     $(".action_btn").attr('id', 'add');
     $(".action_btn").html('Add Book To List');
     $(".form_title").html('Add Book To List');
-    $("#formData")[0].reset();
+    $("#book_form")[0].reset();
 });
-
-

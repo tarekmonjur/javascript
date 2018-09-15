@@ -175,12 +175,12 @@ $(document).on('click', '.edit', function(){
 
 $(document).on('click', '#update', function(e){
     e.preventDefault();
-    let formData = $("#formData").serializeArray();
+    let formData = $("#book_form").serializeArray();
     book.updateBook(formData);
     $(".action_btn").attr('id', 'add');
     $(".action_btn").html('Add Book To List');
     $(".form_title").html('Add Book To List');
-    $("#formData")[0].reset();
+    $("#book_form")[0].reset();
 });
 
 
