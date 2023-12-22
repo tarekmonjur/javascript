@@ -23,11 +23,11 @@
 -   `Closure`
 -   `IIFE - Immediately invoked function expression`
 -   `Hoisting`
--   `Execution Context`:
+-   `Execution Context`: Execution context maintain Environment record or Lexical Environment.
     -   Creation Phase/Stage
     -   Execution Phase/Stage
+    -   Call Stack
 -   `This` Keyword:
-    -   Execution context maintain Environment record
     -   By Default `this` = `window` object on the Browser
     -   In function `this` keyword value determaind based on where the function is calling.
 -   `Binding`:
